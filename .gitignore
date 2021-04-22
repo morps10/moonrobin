@@ -1,5 +1,4 @@
-
-.idea/misc.xml
-.idea/modules.xml
-.idea/moonrobin.iml
-.idea/vcs.xml
+.idea/**
+RobinCoin/.secret
+/RobinCoin/node_modules/
+/RobinCoin/build/
