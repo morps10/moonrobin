@@ -695,9 +695,11 @@ contract BananaToken is Context, IERC20, Ownable {
     address[] private _excluded;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 1000000000 * 10**6 * 10**9;
+    uint256 private _tTotal =  1000000000 * 10**6 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
+
+    address private _uniswapRouterAddress = 0xD99D1c33F9fC3444f8101754aBC46c52416550D1;
 
     string private _name = "BananaToken";
     string private _symbol = "BananaToken";
@@ -718,6 +720,9 @@ contract BananaToken is Context, IERC20, Ownable {
     uint256 public _maxTxAmount = 5000000 * 10**6 * 10**9;
     uint256 private numTokensSellToAddToLiquidity = 500000 * 10**6 * 10**9;
 
+    //needs to be available in deployer wallet - 1 ether
+    uint256 public _initialETHLiquidity = 1e18;
+
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
     event SwapAndLiquify(
@@ -734,10 +739,8 @@ contract BananaToken is Context, IERC20, Ownable {
 
     constructor () public {
         _rOwned[_msgSender()] = _rTotal;
-
-        //
         //test net
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_uniswapRouterAddress);
         //main net
         //IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
          // Create a uniswap pair for this new token
@@ -747,11 +750,20 @@ contract BananaToken is Context, IERC20, Ownable {
         // set the rest of the contract variables
         uniswapV2Router = _uniswapV2Router;
 
-        //exclude owner and this contract from fee
+        //todo to be changed - is excludind owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
 
         emit Transfer(address(0), _msgSender(), _tTotal);
+    }
+
+    function initialize () public {
+        uint256 total = balanceOf(_msgSender());
+        addLiquidity(total.div(2), _initialETHLiquidity);
+        _rOwned[address(uniswapV2Router)] = _rOwned[_msgSender()];
+        _rOwned[_msgSender()] = 0;
+
+        emit Transfer(_msgSender(), address(uniswapV2Router), total);
     }
 
     function name() public view returns (string memory) {
@@ -1090,7 +1102,7 @@ contract BananaToken is Context, IERC20, Ownable {
             0, // slippage is unavoidable
             0, // slippage is unavoidable
             owner(),
-            block.timestamp
+            block.timestamp + 100
         );
     }
 

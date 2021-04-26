@@ -15,20 +15,22 @@ module.exports = {
       confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true,
-      gas: 29000000
+      gas: 29000000,
     },
     bsc: {
       provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
       network_id: 56,
       confirmations: 10,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      networkCheckTimeout: 12000000
+
     },
   },
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+     timeout: 1000000
   },
 
   // Configure your compilers
